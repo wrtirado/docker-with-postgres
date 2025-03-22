@@ -42,3 +42,21 @@ def read_location(db: Session = Depends(get_db), location_id: int = None):
 def add_location(location: LocationCreate, db: Session = Depends(get_db)):
     db_location = create_location(db, location)
     return db_location
+
+
+@router.put("/{location_id}", response_model=Location)
+def change_location(
+    location_id: int, location: LocationCreate, db: Session = Depends(get_db)
+):
+    db_location = update_location(db, location_id, location)
+    if db_location is None:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return db_location
+
+
+@router.delete("/{location_id}", response_model=Location)
+def remove_location(location_id: int, db: Session = Depends(get_db)):
+    db_location = delete_location(db, location_id)
+    if db_location is None:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return db_location
