@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.database import SessionLocal, engine
-from app.models.pydantic.locations_models import Location
-from app.models.sqlalchemy.locations_alchemy import Location as DBLocation
+from app.db.database import SessionLocal, engine
+from app.models.pydantic.pydantic_locations import Location
+from app.models.sqlalchemy.sql_locations import Location as DBLocation
 from app.queries.locations_queries import get_locations
 
 

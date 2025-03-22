@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
-from app.models.pydantic import locations_models
-from app.models.sqlalchemy import locations_alchemy
+from app.models.pydantic import pydantic_locations
+from app.models.sqlalchemy import sql_locations
 
 
 def get_locations(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(locations_alchemy.Location).offset(skip).limit(limit).all()
+    return db.query(sql_locations.Location).offset(skip).limit(limit).all()
 
 
-def create_location(db: Session, location: locations_models.LocationCreate):
-    db_location = locations_alchemy.Location(name=location.name)
+def create_location(db: Session, location: pydantic_locations.LocationCreate):
+    db_location = sql_locations.Location(name=location.name)
     db.add(db_location)
     db.commit()
     db.refresh(db_location)
@@ -16,11 +16,11 @@ def create_location(db: Session, location: locations_models.LocationCreate):
 
 
 def update_location(
-    db: Session, location_id: int, location: locations_models.LocationCreate
+    db: Session, location_id: int, location: pydantic_locations.LocationCreate
 ):
     db_location = (
-        db.query(locations_alchemy.Location)
-        .filter(locations_alchemy.Location.id == location_id)
+        db.query(sql_locations.Location)
+        .filter(sql_locations.Location.id == location_id)
         .first()
     )
     if db_location:
@@ -32,8 +32,8 @@ def update_location(
 
 def delete_location(db: Session, location_id: int):
     db_location = (
-        db.query(locations_alchemy.Location)
-        .filter(locations_alchemy.Location.id == location_id)
+        db.query(sql_locations.Location)
+        .filter(sql_locations.Location.id == location_id)
         .first()
     )
     if db_location:
