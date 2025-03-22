@@ -2,9 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.db.database import SessionLocal, engine
-from app.models.pydantic.pydantic_locations import Location
+from app.models.pydantic.pydantic_locations import Location, LocationCreate
 from app.models.sqlalchemy.sql_locations import Location as DBLocation
-from app.queries.locations_queries import get_locations, get_location
+from app.queries.locations_queries import (
+    get_locations,
+    get_location,
+    create_location,
+    update_location,
+    delete_location,
+)
 
 
 router = APIRouter()
@@ -30,3 +36,9 @@ def read_location(db: Session = Depends(get_db), location_id: int = None):
     if location is None:
         raise HTTPException(status_code=404, detail="Location not found")
     return location
+
+
+@router.post("/", response_model=Location)
+def add_location(location: LocationCreate, db: Session = Depends(get_db)):
+    db_location = create_location(db, location)
+    return db_location
