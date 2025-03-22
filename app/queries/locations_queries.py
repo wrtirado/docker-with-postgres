@@ -7,6 +7,14 @@ def get_locations(db: Session, skip: int = 0, limit: int = 10):
     return db.query(sql_locations.Location).offset(skip).limit(limit).all()
 
 
+def get_location(db: Session, location_id: int):
+    return (
+        db.query(sql_locations.Location)
+        .filter(sql_locations.Location.id == location_id)
+        .first()
+    )
+
+
 def create_location(db: Session, location: pydantic_locations.LocationCreate):
     db_location = sql_locations.Location(name=location.name)
     db.add(db_location)
