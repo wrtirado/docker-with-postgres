@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 from app.database import engine, Base
-from app.models import Item
+from app.models.sqlalchemy.locations import Location
+from app.routers import locations
 
 # Initialize DB tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
-@app.get("/")
-def read_root():
-    return {"message": "FastAPI + Docker + Postgres is working!"}
+app.include_router(locations.router, prefix="/locations")
