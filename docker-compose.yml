@@ -28,6 +28,8 @@ services:
         condition: service_healthy  # ✅ Wait for DB to be healthy
     environment:
       DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydatabase
+    command: >
+      sh -c "python seed.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
   pgadmin:  # ✅ Add pgAdmin service
     image: dpage/pgadmin4
