@@ -29,7 +29,9 @@ services:
     environment:
       DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydatabase
     command: >
-      sh -c "python seed.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+      sh -c "python -c 'from app.db.database import engine; from app.models.sqlalchemy.sql_locations import Base; Base.metadata.create_all(bind=engine)' &&
+      python seed.py &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
   pgadmin:  # ✅ Add pgAdmin service
     image: dpage/pgadmin4
