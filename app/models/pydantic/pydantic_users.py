@@ -2,10 +2,8 @@ from pydantic import BaseModel
 
 
 class BaseUser(BaseModel):
-    username: str
     email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+    is_active: bool = True
 
 
 class UserCreate(BaseUser):
@@ -14,10 +12,8 @@ class UserCreate(BaseUser):
 
 class User(BaseUser):
     id: int
-    username: str
     email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+    is_active: bool
 
     class Config:
         orm_mode = True  # Tells Pydantic to treat the SQLAlchemy model as dict
