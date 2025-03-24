@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.services.email_service import send_email
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal, engine
-from app.auth.queries import generate_auth_code, verify_auth_code, create_user
+from app.auth.queries import generate_auth_code, verify_auth_code
 from app.models.sqlalchemy.sql_users import User
 from app.models.pydantic.pydantic_users import UserCreate
 from app.models.pydantic.pydantic_users import User as UserPydantic
@@ -41,9 +41,3 @@ def request_code(email: str, db: Session = Depends(get_db)):
 # authentication code is correct. If the code is correct, a
 # JWT token will be returned.
 router.post("/verify-code")(verify_auth_code)
-
-
-@router.post("/register")
-def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
-    user = create_user(db, user_data)
-    return user
