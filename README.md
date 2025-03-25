@@ -87,7 +87,7 @@ curl -X GET "http://localhost:8000/offices/protected-route" -H "Authorization: B
 
 
 ```
-{"message":"Hello, test@example.com, you have access!"}%
+{"message":"Hello, test@example.com, you have access!"}
 ```
 
 ---
