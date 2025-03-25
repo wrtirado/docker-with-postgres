@@ -1,12 +1,17 @@
 from app.db.database import SessionLocal
-from app.queries import locations_queries
-from app.models.pydantic import pydantic_locations
+from app.queries import office_queries
+from app.models.pydantic import pydantic_office
 
 db = SessionLocal()
 
-sample_items = ["Refrigerator", "Freezer", "Pantry", "Bread Basket"]
+sample_offices = [
+    "Peakview Sport and Spine",
+    "Get Back To Work Occupational Therapists",
+    "Dr. HT Physical Therapy",
+    "Crunchin' Chiropractic",
+]
 
-for item in sample_items:
-    locations_queries.create_location(db, pydantic_locations.LocationCreate(name=item))
+for office in sample_offices:
+    office_queries.create_office(db, pydantic_office.OfficeCreate(business_name=office))
 
 db.close()

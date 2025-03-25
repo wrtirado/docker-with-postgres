@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String
 from app.db.database import Base
 
 
-class Location(Base):
-    __tablename__ = "locations"
+class Office(Base):
+    __tablename__ = "offices"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    business_name = Column(String, index=True)

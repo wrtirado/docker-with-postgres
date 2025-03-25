@@ -1,15 +1,15 @@
 from pydantic import BaseModel
 
 
-class BaseLocation(BaseModel):
-    name: str
+class BaseOffice(BaseModel):
+    business_name: str
 
 
-class LocationCreate(BaseLocation):
+class OfficeCreate(BaseOffice):
     pass
 
 
-class Location(BaseLocation):
+class Office(BaseOffice):
     id: int
 
     class Config:
