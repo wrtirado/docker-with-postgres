@@ -37,10 +37,40 @@ This will start all necessary services.
 (It is easiest to handle most of this testing through the Swagger UI)
 
 1. Register new user with a POST to **/users/register**
+   - **POST http://localhost:8000/users/register**
+   - **Body: JSON**
+     ```json
+     {
+       "email": "test@example.com",
+       "password": "password123"
+     }
+     ```
+   - **Response:**
+     ```json
+     {
+       "email": "test@example.com",
+       "is_active": true,
+       "id": 1
+     }
+     ```
 2. Request an auth code with the newly registered email using a POST to **/auth/request-code**
-   - As of 3/24/25, I have disabled the function that sends the auth code via email. I added a print function that displays the code in the terminal. Copy the code from there.
+   - **POST http://localhost:8000/auth/request-code?email=test@example.com**
+   - As of 3/24/25, I have disabled the function that sends the auth code via email. I added a print function that displays the code in the terminal. Copy the code from there. The code will appear in the terminal running the docker containers, within the logs, labeled by "fastapi_app".
+   - **Response:**
+     ```json
+     {
+       "message": "If your email is registered, you will receive an authentication code."
+     }
+     ```
 3. To verify the copied auth code, use a POST to **/auth/verify-code** and send both the email associated with the code, and the code itself
-   - If successfull, copy the JWT token that is returned.
+   - **POST http://localhost:8000/auth/verify-code?email=test@example.com&auth_code=<put auth code here>**
+   - If successfull, copy the JWT token that is returned. You will return something like this:
+     ```json
+     {
+       "access_token": "big hash type number",
+       "token_type": "bearer"
+     }
+     ```
 4. In a terminal window, send a curl request with the following structure:
 
 ```
@@ -53,7 +83,12 @@ This should spit out a unauthorized related error. Now, try adding an **'Authori
 curl -X GET "http://localhost:8000/offices/protected-route" -H "Authorization: Bearer <your.token.here.should.look.like.string.of.random.characters>"
 ```
 
-**/offices/protected-route** is, well, a protected route. If everything worked well, you should get a message showing you're authenticated and successfully ran a GET on the protected route!
+**/offices/protected-route** is, well, a protected route. If everything worked well, you should get a message showing you're authenticated and successfully ran a GET on the protected route! You should see this in your terminal:
+
+
+```
+{"message":"Hello, test@example.com, you have access!"}%
+```
 
 ---
 
