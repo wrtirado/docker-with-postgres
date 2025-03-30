@@ -34,8 +34,20 @@ def verify_auth_code(email: str, auth_code: str):
     # Delete the auth code from Redis
     redis_client.delete(f"auth_code:{email}")
 
-    # generate a JWT token
-    payload = {"sub": email, "exp": datetime.utcnow() + timedelta(minutes=10)}
-    jwt_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    # Generate access token (short-lived)
+    access_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(minutes=10)}
+    access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
 
-    return {"access_token": jwt_token, "token_type": "bearer"}
+    # Generate refresh token (longer-lived)
+    refresh_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(days=30)}
+    refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
+
+    # Store the refresh token in Redis (optional, for invalidation)
+    redis_client.setex(f"refresh_token:{email}", timedelta(days=30), refresh_token)
+
+    # Return the tokens
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
