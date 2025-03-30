@@ -4,7 +4,8 @@ import redis
 from datetime import timedelta
 
 # imports for database interaction
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer
 
 # imports for auth code verification and JWT generation/send
 import jwt
@@ -35,11 +36,19 @@ def verify_auth_code(email: str, auth_code: str):
     redis_client.delete(f"auth_code:{email}")
 
     # Generate access token (short-lived)
-    access_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(minutes=10)}
+    access_payload = {
+        "sub": email,
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "access",
+    }
     access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
 
     # Generate refresh token (longer-lived)
-    refresh_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(days=30)}
+    refresh_payload = {
+        "sub": email,
+        "exp": datetime.utcnow() + timedelta(days=30),
+        "token_type": "refresh",
+    }
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
 
     # Store the refresh token in Redis (optional, for invalidation)
@@ -54,19 +63,24 @@ def verify_auth_code(email: str, auth_code: str):
 
 
 def verify_refresh_token(refresh_token: str):
+    # Decode the refresh token
     try:
         payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
         email = payload["sub"]
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Refresh token expired")
+        raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(status_code=401, detail="Invalid token")
     # Check if the refresh token is stored in Redis
     stored_refresh_token = redis_client.get(f"refresh_token:{email}")
     if not stored_refresh_token or stored_refresh_token != refresh_token:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
     # Generate a new access token
-    access_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(minutes=10)}
+    access_payload = {
+        "sub": email,
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "access",
+    }
     new_access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
     return {"access_token": new_access_token, "token_type": "bearer"}
 
@@ -82,3 +96,21 @@ def delete_refresh_token(refresh_token):
 
     redis_client.delete(f"refresh_token:{email}")
     return {"message": "Refresh token deleted successfully"}
+
+
+def validate_token(authorization: str, expected_token_type: str):
+    # Check if there is an Authorization header
+    # and if the Authorization header starts with "Bearer "
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid Authorization header")
+    token = authorization.split(" ")[1]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        # Check if the token is an access token
+        if payload.get("token_type") != expected_token_type:
+            raise HTTPException(status_code=401, detail="Invalid token type")
+        return token
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")

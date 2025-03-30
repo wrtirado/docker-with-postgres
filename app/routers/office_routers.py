@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Security
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+)
 import jwt
 from app.config import SECRET_KEY
 from sqlalchemy.orm import Session
@@ -14,9 +18,11 @@ from app.queries.office_queries import (
     update_office,
     delete_office,
 )
+from app.auth.auth_queries import validate_token
 
 
 router = APIRouter()
+security = HTTPBearer()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/verefy-code")
 
@@ -40,7 +46,16 @@ def get_db():
 
 
 @router.get("/protected-route")
-def protected_route(user: str = Depends(get_current_user)):
+def protected_route(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    authorization = credentials.credentials
+    token = validate_token(authorization, "access")
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = payload["sub"]
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
     return {"message": f"Hello, {user}, you have access!"}
 
 
