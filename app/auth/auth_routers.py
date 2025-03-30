@@ -40,4 +40,6 @@ def request_code(email: str, db: Session = Depends(get_db)):
 # and an authentication code as input and verify that the
 # authentication code is correct. If the code is correct, a
 # JWT token will be returned.
-router.post("/verify-code")(verify_auth_code)
+@router.post("/verify-code")
+def verify_code():
+    return verify_auth_code
