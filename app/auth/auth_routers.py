@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.services.email_service import send_email
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal, engine
-from app.auth.queries import generate_auth_code, verify_auth_code, verify_refresh_token
+from app.auth.queries import (
+    generate_auth_code,
+    verify_auth_code,
+    verify_refresh_token,
+    delete_refresh_token,
+)
 from app.models.sqlalchemy.sql_users import User
 from app.models.pydantic.pydantic_users import UserCreate
 from app.models.pydantic.pydantic_users import User as UserPydantic
@@ -52,3 +57,12 @@ def verify_code(email: str, auth_code: str):
 @router.post("/refresh-token")
 def refresh_token(refresh_token: str):
     return verify_refresh_token(refresh_token)
+
+
+# The /auth/logout endpoint will take a refresh token
+# as input and invalidate the refresh token. This endpoint
+# is useful for logging out the user and preventing further
+# access to the application using the refresh token.
+@router.post("/logout")
+def logout(refresh_token: str):
+    return delete_refresh_token(refresh_token)

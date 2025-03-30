@@ -69,3 +69,16 @@ def verify_refresh_token(refresh_token: str):
     access_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(minutes=10)}
     new_access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
     return {"access_token": new_access_token, "token_type": "bearer"}
+
+
+def delete_refresh_token(refresh_token):
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
+        email = payload["sub"]
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    redis_client.delete(f"refresh_token:{email}")
+    return {"message": "Refresh token deleted successfully"}
