@@ -8,3 +8,5 @@ PyJWT
 redis
 sendgrid
 python-dotenv
+pytest
+pytest-mock
