@@ -51,3 +51,21 @@ def verify_auth_code(email: str, auth_code: str):
         "refresh_token": refresh_token,
         "token_type": "bearer",
     }
+
+
+def verify_refresh_token(refresh_token: str):
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
+        email = payload["sub"]
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    # Check if the refresh token is stored in Redis
+    stored_refresh_token = redis_client.get(f"refresh_token:{email}")
+    if not stored_refresh_token or stored_refresh_token != refresh_token:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    # Generate a new access token
+    access_payload = {"sub": email, "exp": datetime.utcnow() + timedelta(minutes=10)}
+    new_access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
+    return {"access_token": new_access_token, "token_type": "bearer"}

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.services.email_service import send_email
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal, engine
-from app.auth.queries import generate_auth_code, verify_auth_code
+from app.auth.queries import generate_auth_code, verify_auth_code, verify_refresh_token
 from app.models.sqlalchemy.sql_users import User
 from app.models.pydantic.pydantic_users import UserCreate
 from app.models.pydantic.pydantic_users import User as UserPydantic
@@ -41,5 +41,14 @@ def request_code(email: str, db: Session = Depends(get_db)):
 # authentication code is correct. If the code is correct, a
 # JWT token will be returned.
 @router.post("/verify-code")
-def verify_code():
-    return verify_auth_code
+def verify_code(email: str, auth_code: str):
+    return verify_auth_code(email, auth_code)
+
+
+# The /auth/refresh-token endpoint will take a refresh token
+# as input and return a new access token if the refresh token
+# is valid. This endpoint is useful for refreshing the access
+# token without requiring the user to log in again.
+@router.post("/refresh-token")
+def refresh_token(refresh_token: str):
+    return verify_refresh_token(refresh_token)
