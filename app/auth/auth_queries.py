@@ -93,7 +93,14 @@ def delete_refresh_token(refresh_token):
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
-
+    # Check if the refresh token is stored in Redis
+    stored_refresh_token = redis_client.get(f"refresh_token:{email}")
+    if not stored_refresh_token or stored_refresh_token != refresh_token:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    # Delete the refresh token from Redis
+    # This will invalidate the refresh token
+    # and prevent further access to the application
+    # using this refresh token
     redis_client.delete(f"refresh_token:{email}")
     return {"message": "Refresh token deleted successfully"}
 
