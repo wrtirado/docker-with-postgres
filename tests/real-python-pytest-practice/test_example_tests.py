@@ -1,5 +1,5 @@
 import pytest
-from example_tests import count_total_list_items, format_data_for_display
+from example_tests import count_total_list_items, format_data_for_display, is_palendrome
 from fixtures import (
     example_people_data_2,
 )  # <- Method 2: import the fuxture from a different file
@@ -51,3 +51,50 @@ def test_format_data_for_display_2(example_people_data_2):
         "Alfonsa Ruiz: Senior Software Engineer",
         "Sayid Khan: Project Manager",
     ]
+
+
+# Tests showing parameterization
+
+
+@pytest.mark.parametrized
+@pytest.mark.parametrize(
+    "palindrome",
+    [
+        "racecar",
+        "level",
+        "rotor",
+        "deified",
+        "civic",
+        "madam",
+        "",
+        "a",
+        "aa",
+        "aba",
+        "abba",
+        "Bob",
+        "Never odd or even",
+        "Do geese see God?",
+    ],
+)
+def test_is_palindrome(palindrome):
+    assert is_palendrome(palindrome)
+
+
+@pytest.mark.parametrized
+@pytest.mark.parametrize(
+    "non_palindrome",
+    [
+        "hello",
+        "world",
+        "python",
+        "pytest",
+        "testing",
+        "example",
+        "data",
+        "structure",
+        "algorithm",
+        "function",
+    ],
+)
+def test_is_not_palindrome(non_palindrome):
+    assert not is_palendrome(non_palindrome)
