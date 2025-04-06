@@ -4,6 +4,7 @@ from app.auth.auth_queries import generate_auth_code, verify_auth_code
 from fastapi import HTTPException
 
 
+@pytest.mark.auth_queries
 def test_generate_auth_code(mocker):
     # Mock Redis client
     mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
@@ -21,6 +22,7 @@ def test_generate_auth_code(mocker):
     )
 
 
+@pytest.mark.auth_queries
 def test_verify_auth_code_valid(mocker):
     # Mock Redis client
     mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
@@ -39,6 +41,7 @@ def test_verify_auth_code_valid(mocker):
     mock_redis.delete.assert_called_once_with(f"auth_code:{email}")
 
 
+@pytest.mark.auth_queries
 def test_verify_auth_code_invalid(mocker):
     # Mock Redis client
     mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
