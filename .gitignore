@@ -1,3 +1,5 @@
 venv
 .env
-tests/real-python-pytest-practice
+tests/real-python-pytest-practice/fixtures
+tests/real-python-pytest-practice/marks
+tests/real-python-pytest-practice/parametrization
