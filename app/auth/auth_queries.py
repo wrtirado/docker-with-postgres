@@ -1,7 +1,7 @@
 # imports for generate_auth_code function
 import random
 import redis
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 # imports for database interaction
 from fastapi import HTTPException, Depends
@@ -9,7 +9,6 @@ from fastapi.security import HTTPBearer
 
 # imports for auth code verification and JWT generation/send
 import jwt
-from datetime import datetime, timedelta
 from app.config import SECRET_KEY
 
 # Connect to Redis

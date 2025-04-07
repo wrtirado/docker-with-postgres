@@ -1,7 +1,14 @@
 import pytest
 from unittest.mock import MagicMock
-from app.auth.auth_queries import generate_auth_code, verify_auth_code
+from app.auth.auth_queries import (
+    generate_auth_code,
+    verify_auth_code,
+    verify_refresh_token,
+)
 from fastapi import HTTPException
+from datetime import timedelta, datetime
+import jwt
+from app.config import SECRET_KEY
 
 
 @pytest.mark.auth_queries
@@ -62,3 +69,26 @@ def test_verify_auth_code_invalid(mocker):
     assert excinfo.value.status_code == 400
     assert excinfo.value.detail == "Invalid or expired code"
     mock_redis.get.assert_called_once_with(f"auth_code:{email}")
+
+
+@pytest.mark.auth_queries
+def test_verify_refresh_token_valid(mocker):
+    # Arrange: Encode a valid refresh token
+    refresh_payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "refresh",
+    }
+    refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
+    # Arrange: Mock the Redis client
+    mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
+    mock_redis.get = MagicMock(return_value=refresh_token)
+    email = "test@example.com"
+
+    # Act: Call the function
+    result = verify_refresh_token(refresh_token)
+
+    # Assert: Verify the behavior
+    assert "access_token" in result
+    assert result["token_type"] == "bearer"
+    mock_redis.get.assert_called_once_with(f"refresh_token:{email}")
