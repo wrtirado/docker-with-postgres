@@ -4,6 +4,8 @@ from app.auth.auth_queries import (
     generate_auth_code,
     verify_auth_code,
     verify_refresh_token,
+    delete_refresh_token,
+    validate_token,
 )
 from fastapi import HTTPException
 from datetime import timedelta, datetime
@@ -138,3 +140,169 @@ def test_verify_refresh_token_invalid(mocker):
     # Assert: Verify the behavior
     assert excinfo.value.status_code == 401
     assert excinfo.value.detail == "Invalid token"
+
+
+@pytest.mark.auth_queries
+def test_delete_refresh_token_valid(mocker):
+    # Arrange: Encode a valid refresh token
+    refresh_payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "refresh",
+    }
+    refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
+    # Arrange: Mock the Redis client
+    mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
+    mock_redis.get = MagicMock(return_value=refresh_token)
+    mock_redis.delete = MagicMock()
+    email = "test@example.com"
+
+    # Act: Call the function
+    result = delete_refresh_token(refresh_token)
+
+    # Assert: Verify the behavior
+    assert result["message"] == "Refresh token deleted successfully"
+    mock_redis.get.assert_called_once_with(f"refresh_token:{email}")
+    mock_redis.delete.assert_called_once_with(f"refresh_token:{email}")
+
+
+@pytest.mark.auth_queries
+def test_delete_refresh_token_expired(mocker):
+    # Arrange: Encode a valid refresh token
+    refresh_payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() - timedelta(minutes=10),
+        "token_type": "refresh",
+    }
+    refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
+    # Arrange: Mock the Redis client
+    mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
+    mock_redis.get = MagicMock(return_value=refresh_token)
+    mock_redis.delete = MagicMock()
+    email = "test@example.com"
+
+    # Act: Call the function
+    with pytest.raises(HTTPException) as excinfo:
+        delete_refresh_token(refresh_token)
+
+    # Assert: Verify the behavior
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Token has expired"
+
+
+@pytest.mark.auth_queries
+def test_delete_refresh_token_invalid(mocker):
+    # Arrange: Encode a valid refresh token
+    refresh_payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "refresh",
+    }
+    refresh_token = jwt.encode(refresh_payload, "123456789", algorithm="HS256")
+    # Arrange: Mock the Redis client
+    mock_redis = mocker.patch("app.auth.auth_queries.redis_client")
+    mock_redis.get = MagicMock(return_value=refresh_token)
+    email = "test@example.com"
+
+    # Act: Call the function
+    with pytest.raises(HTTPException) as excinfo:
+        verify_refresh_token(refresh_token)
+
+    # Assert: Verify the behavior
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Invalid token"
+
+
+import pytest
+from unittest.mock import MagicMock
+from app.auth.auth_queries import validate_token
+from fastapi import HTTPException
+from datetime import datetime, timedelta
+import jwt
+from app.config import SECRET_KEY
+
+
+@pytest.mark.auth_queries
+def test_validate_token_valid(mocker):
+    # Arrange: Create a valid token
+    payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "access",
+    }
+    valid_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    authorization = f"Bearer {valid_token}"
+
+    # Act: Call the function
+    result = validate_token(authorization, "access")
+
+    # Assert: Verify the behavior
+    assert result == valid_token
+
+
+@pytest.mark.auth_queries
+def test_validate_token_invalid_header():
+    # Arrange: Invalid Authorization header
+    authorization = "InvalidHeader token"
+
+    # Act & Assert: Expect an exception
+    with pytest.raises(HTTPException) as excinfo:
+        validate_token(authorization, "access")
+
+    # Assert: Verify the exception details
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Invalid Authorization header"
+
+
+@pytest.mark.auth_queries
+def test_validate_token_expired():
+    # Arrange: Create an expired token
+    payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() - timedelta(minutes=10),  # Expired 10 minutes ago
+        "token_type": "access",
+    }
+    expired_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    authorization = f"Bearer {expired_token}"
+
+    # Act & Assert: Expect an exception
+    with pytest.raises(HTTPException) as excinfo:
+        validate_token(authorization, "access")
+
+    # Assert: Verify the exception details
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Token has expired"
+
+
+@pytest.mark.auth_queries
+def test_validate_token_invalid_token():
+    # Arrange: Malformed token
+    authorization = "Bearer invalid.token.here"
+
+    # Act & Assert: Expect an exception
+    with pytest.raises(HTTPException) as excinfo:
+        validate_token(authorization, "access")
+
+    # Assert: Verify the exception details
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Invalid token"
+
+
+@pytest.mark.auth_queries
+def test_validate_token_wrong_type():
+    # Arrange: Create a token with the wrong type
+    payload = {
+        "sub": "test@example.com",
+        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "token_type": "refresh",  # Wrong type
+    }
+    wrong_type_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    authorization = f"Bearer {wrong_type_token}"
+
+    # Act & Assert: Expect an exception
+    with pytest.raises(HTTPException) as excinfo:
+        validate_token(authorization, "access")  # Expected type is "access"
+
+    # Assert: Verify the exception details
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Invalid token type"
