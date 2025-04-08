@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseUser(BaseModel):
@@ -15,5 +15,6 @@ class User(BaseUser):
     email: str | None = None
     is_active: bool
 
-    class Config:
-        orm_mode = True  # Tells Pydantic to treat the SQLAlchemy model as dict
+    model_config = ConfigDict(
+        from_attributes=True
+    )  # Tells Pydantic to treat the SQLAlchemy model as dict

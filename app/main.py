@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from app.db.database import engine, Base
+from app.db.database import engine
 from app.models.sqlalchemy.sql_office import Office
 from app.routers import office_routers, users_routers
 from app.auth import auth_routers
 
 # Initialize DB tables
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

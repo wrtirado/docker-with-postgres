@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseOffice(BaseModel):
@@ -12,5 +12,6 @@ class OfficeCreate(BaseOffice):
 class Office(BaseOffice):
     id: int
 
-    class Config:
-        orm_mode = True  # Tells Pydantic to treat the SQLAlchemy model as dict
+    model_config = ConfigDict(
+        from_attributes=True
+    )  # Tells Pydantic to treat the SQLAlchemy model as dict
