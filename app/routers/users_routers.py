@@ -5,6 +5,7 @@ from app.queries.users_queries import create_user
 from app.models.sqlalchemy.sql_users import User
 from app.models.pydantic.pydantic_users import UserCreate
 from app.models.pydantic.pydantic_users import User as UserPydantic
+from app.db.database import get_db
 
 router = APIRouter()
 
@@ -23,14 +24,6 @@ router = APIRouter()
 # @router.get("/protected-route")
 # def protected_route(user: str = Depends(get_current_user)):
 #     return {"message": f"Hello, {user}, you have access!"}
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/register")

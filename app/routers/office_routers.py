@@ -19,6 +19,7 @@ from app.queries.office_queries import (
     delete_office,
 )
 from app.auth.auth_queries import validate_token
+from app.db.database import get_db
 
 
 router = APIRouter()
@@ -35,14 +36,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get("/protected-route")

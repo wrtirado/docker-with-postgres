@@ -17,17 +17,10 @@ from app.auth.auth_pydantic_models import (
 from app.models.sqlalchemy.sql_users import User
 from app.models.pydantic.pydantic_users import UserCreate
 from app.models.pydantic.pydantic_users import User as UserPydantic
+from app.db.database import get_db
 
 router = APIRouter()
 security = HTTPBearer()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # The /auth/request-code endpoint will take an email address
