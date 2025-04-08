@@ -1,5 +1,58 @@
-venv
-.env
+# Real python pytest practice
 tests/real-python-pytest-practice/fixtures
 tests/real-python-pytest-practice/marks
 tests/real-python-pytest-practice/parametrization
+
+# Virtual environment
+venv/
+.env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# pytest cache and logs
+.pytest_cache/
+pytest.log
+
+# Docker-related files
+*.env  # If you have other `.env` files for Docker or testing
+*.env.*
+
+# IDE/editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.orig
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+*.coverage.*
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Node.js (if applicable)
+node_modules/
+
+# Test-related files
+tests/real-python-pytest-practice/
+
+# Database-related files
+pgdata/
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
