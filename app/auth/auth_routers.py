@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.services.email_service import send_email
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from app.db.database import SessionLocal, engine
 from app.auth.auth_queries import (
     generate_auth_code,
@@ -28,20 +29,67 @@ security = HTTPBearer()
 # address is registered in the database.
 @router.post("/request-code")
 def request_code(request: RequestCodeRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == request.email).first()
+    try:
+        # Attempt to query the database
+        user = db.query(User).filter(User.email == request.email).first()
 
-    if user:
-        auth_code = generate_auth_code(request.email)
-        print(f"Generated auth code: {auth_code}")
-        print(
-            "Update app/auth/auth_routers -> request_code to restart email send functionality"
+        if user:
+            auth_code = generate_auth_code(request.email)
+            print(f"Generated auth code: {auth_code}")
+            print(
+                "Update app/auth/auth_routers -> request_code to restart email send functionality"
+            )
+            # Uncomment the line below to actually send the email
+            # send_email(email, auth_code)
+
+    except SQLAlchemyError as e:
+        # Log the SQLAlchemy error (optional)
+        print(f"SQLAlchemy error occurred: {e}")
+        # Raise an HTTP 500 error
+        raise HTTPException(
+            status_code=500,
+            detail="An internal server error occurred. Please try again later.",
         )
-        # uncomment the line below to actually send the email
-        # send_email(email, auth_code)
+    except Exception as e:
+        # Catch any other unexpected errors
+        print(f"Unexpected error occurred: {e}")
+        # Raise an HTTP 500 error
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred. Please try again later.",
+        )
 
     return {
         "message": "If your email is registered, you will receive an authentication code."
     }
+
+
+# def request_code(request: RequestCodeRequest, db: Session = Depends(get_db)):
+#     try:
+#         # Attempt to query the database
+#         user = db.query(User).filter(User.email == request.email).first()
+
+#         if user:
+#             auth_code = generate_auth_code(request.email)
+#             print(f"Generated auth code: {auth_code}")
+#             print(
+#                 "Update app/auth/auth_routers -> request_code to restart email send functionality"
+#             )
+#             # Uncomment the line below to actually send the email
+#             # send_email(email, auth_code)
+
+#     except SQLAlchemyError as e:
+#         # Log the error (optional)
+#         print(f"Database error occurred: {e}")
+#         # Raise an HTTP 500 error
+#         raise HTTPException(
+#             status_code=500,
+#             detail="An internal server error occurred. Please try again later.",
+#         )
+
+#     return {
+#         "message": "If your email is registered, you will receive an authentication code."
+#     }
 
 
 # The /auth/verify-code endpoint will take an email address

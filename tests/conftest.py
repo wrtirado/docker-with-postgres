@@ -21,9 +21,7 @@ def client():
 # Provides a fake DB session for tests
 @pytest.fixture
 def mock_db_session(mocker):
-    mock_session = mocker.MagicMock()
-    mock_session.query.return_value.filter.return_value.first.return_value = None
-    return mock_session
+    return mocker.MagicMock()
 
 
 # Automatically override the DB dependency for all tests that request 'client' + 'mock_db_session'
