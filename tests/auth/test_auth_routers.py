@@ -63,6 +63,7 @@ def test_request_code_database_error(client, mock_db_session):
 @pytest.mark.auth_routers
 def test_request_code_handles_bad_request_body(client, mocker):
     # Act: Call the /auth/request-code route
+    # with an invalid request body (see "emails" instead of "email")
     response = client.post("/auth/request-code", json={"emails": "test@example.com"})
 
     # Assert: Verify the response
