@@ -58,3 +58,22 @@ def test_request_code_database_error(client, mock_db_session):
     assert response.json() == {
         "detail": "An internal server error occurred. Please try again later."
     }
+
+
+@pytest.mark.auth_routers
+def test_request_code_handles_bad_request_body(client, mocker):
+    # Act: Call the /auth/request-code route
+    response = client.post("/auth/request-code", json={"emails": "test@example.com"})
+
+    # Assert: Verify the response
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": [
+            {
+                "input": {"emails": "test@example.com"},
+                "loc": ["body", "email"],
+                "msg": "Field required",
+                "type": "missing",
+            }
+        ]
+    }
