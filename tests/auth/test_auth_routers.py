@@ -219,3 +219,33 @@ def test_refresh_token_expired_token(client, mocker):
     assert response.status_code == 401
     assert response.json() == {"detail": "Token has expired"}
     mock_validate_token.assert_called_once_with("expired-token", "refresh")
+
+
+@pytest.mark.auth_routers
+def test_refresh_token_success(client, mocker):
+    # Arrange: Mock the validate_token and verify_refresh_token functions
+    mock_validate_token = mocker.patch("app.auth.auth_routers.validate_token")
+    mock_validate_token.return_value = "valid-refresh-token"
+
+    mock_verify_refresh_token = mocker.patch(
+        "app.auth.auth_routers.verify_refresh_token"
+    )
+    mock_verify_refresh_token.return_value = {
+        "access_token": "new-access-token",
+        "token_type": "bearer",
+    }
+
+    # Act: Call the /auth/refresh-token route with a valid token
+    response = client.post(
+        "/auth/refresh-token",
+        headers={"Authorization": "Bearer valid-refresh-token"},
+    )
+
+    # Assert: Verify the response
+    assert response.status_code == 200
+    assert response.json() == {
+        "access_token": "new-access-token",
+        "token_type": "bearer",
+    }
+    mock_validate_token.assert_called_once_with("valid-refresh-token", "refresh")
+    mock_verify_refresh_token.assert_called_once_with("valid-refresh-token")
