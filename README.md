@@ -126,12 +126,37 @@ If successful, you should see this in your terminal:
 {"message":"Refresh token deleted successfully"}
 ```
 
+---
+
 ## Accessing Protected Routes
 
 When accessing protected routes, make sure that you include an active access_token to the request's Authorization header in the following format:
 
 ```
 'Authorization: Bearer <access_token>'
+```
+
+---
+
+## Testing Suite
+
+#### With containers turned off...
+
+Test entire suite:
+
+```
+pytest
+```
+
+Testing a specific area of a codebase is possible with Pytest Marks. Marks have been set up, and registered in the `pytest.ini` file. When adding new Marks, make sure to add them here and in `pytest.ini`. The relevant existing Marks are as follows:
+
+- auth_queries
+- auth_routers
+
+You can run specific tests with the following command:
+
+```
+pytest -m <mark>
 ```
 
 ---
