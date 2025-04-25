@@ -249,3 +249,13 @@ def test_refresh_token_success(client, mocker):
     }
     mock_validate_token.assert_called_once_with("valid-refresh-token", "refresh")
     mock_verify_refresh_token.assert_called_once_with("valid-refresh-token")
+
+
+@pytest.mark.auth_routers
+def test_logout_missing_authorization_header(client):
+    # Act: Call the /auth/refresh-token route without an authorization header
+    response = client.post("/auth/logout")
+
+    # Assert: Verify the response
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Not authenticated"}
