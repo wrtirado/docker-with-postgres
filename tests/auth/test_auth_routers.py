@@ -1,5 +1,5 @@
 import pytest
-from fastapi import FastAPI
+from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from app.auth.auth_routers import request_code, verify_code, refresh_token, logout
 from app.auth.auth_queries import generate_auth_code
@@ -149,4 +149,23 @@ def test_verify_code_valid_request(client, mocker):
         "refresh_token": "refresh123",
         "token_type": "bearer",
     }
+    mock_verify_auth_code.assert_called_once_with("test@example.com", "123456")
+
+
+@pytest.mark.auth_routers
+def test_verify_code_invalid_code(client, mocker):
+    # Arrange: Mock the verify_auth_code function to raise an exception
+    mock_verify_auth_code = mocker.patch("app.auth.auth_routers.verify_auth_code")
+    mock_verify_auth_code.side_effect = HTTPException(
+        status_code=400, detail="Invalid or expired code"
+    )
+
+    # Act: Call the /auth/verify-code route
+    response = client.post(
+        "/auth/verify-code", json={"email": "test@example.com", "auth_code": "123456"}
+    )
+
+    # Assert: Verify the response
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid or expired code"}
     mock_verify_auth_code.assert_called_once_with("test@example.com", "123456")
