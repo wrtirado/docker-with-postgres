@@ -64,34 +64,6 @@ def request_code(request: RequestCodeRequest, db: Session = Depends(get_db)):
     }
 
 
-# def request_code(request: RequestCodeRequest, db: Session = Depends(get_db)):
-#     try:
-#         # Attempt to query the database
-#         user = db.query(User).filter(User.email == request.email).first()
-
-#         if user:
-#             auth_code = generate_auth_code(request.email)
-#             print(f"Generated auth code: {auth_code}")
-#             print(
-#                 "Update app/auth/auth_routers -> request_code to restart email send functionality"
-#             )
-#             # Uncomment the line below to actually send the email
-#             # send_email(email, auth_code)
-
-#     except SQLAlchemyError as e:
-#         # Log the error (optional)
-#         print(f"Database error occurred: {e}")
-#         # Raise an HTTP 500 error
-#         raise HTTPException(
-#             status_code=500,
-#             detail="An internal server error occurred. Please try again later.",
-#         )
-
-#     return {
-#         "message": "If your email is registered, you will receive an authentication code."
-#     }
-
-
 # The /auth/verify-code endpoint will take an email address
 # and an authentication code as input and verify that the
 # authentication code is correct. If the code is correct, a

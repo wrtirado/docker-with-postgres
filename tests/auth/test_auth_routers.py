@@ -78,3 +78,28 @@ def test_request_code_handles_bad_request_body(client, mocker):
             }
         ]
     }
+
+
+@pytest.mark.auth_routers
+def test_verify_code_missing_fields(client):
+    # Act: Call the /auth/verify-code route with an empty body
+    response = client.post("/auth/verify-code", json={})
+
+    # Assert: Verify the response
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": [
+            {
+                "input": {},
+                "loc": ["body", "email"],
+                "msg": "Field required",
+                "type": "missing",
+            },
+            {
+                "input": {},
+                "loc": ["body", "auth_code"],
+                "msg": "Field required",
+                "type": "missing",
+            },
+        ]
+    }

@@ -2,3 +2,4 @@ INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/request
 INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/request-code "HTTP/1.1 200 OK"
 INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/request-code "HTTP/1.1 500 Internal Server Error"
 INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/request-code "HTTP/1.1 422 Unprocessable Entity"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/verify-code "HTTP/1.1 422 Unprocessable Entity"
