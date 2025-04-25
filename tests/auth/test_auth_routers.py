@@ -169,3 +169,13 @@ def test_verify_code_invalid_code(client, mocker):
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid or expired code"}
     mock_verify_auth_code.assert_called_once_with("test@example.com", "123456")
+
+
+@pytest.mark.auth_routers
+def test_refresh_token_missing_authorization_header(client):
+    # Act: Call the /auth/refresh-token route without an authorization header
+    response = client.post("/auth/refresh-token")
+
+    # Assert: Verify the response
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Not authenticated"}

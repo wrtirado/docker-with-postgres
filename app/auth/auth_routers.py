@@ -93,7 +93,7 @@ def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(security))
 # access to the application using the refresh token.
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    # Validate the token and ensure it's a refresh token
+    # Extract the token from the authorization header
     authorization = credentials.credentials
     # Validate the token and ensure its a refresh_token
     refresh_token = validate_token(authorization, "refresh")

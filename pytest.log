@@ -6,3 +6,4 @@ INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/verify-
 INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/verify-code "HTTP/1.1 422 Unprocessable Entity"
 INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/verify-code "HTTP/1.1 200 OK"
 INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/verify-code "HTTP/1.1 400 Bad Request"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/auth/refresh-token "HTTP/1.1 403 Forbidden"
