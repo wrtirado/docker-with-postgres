@@ -125,3 +125,28 @@ def test_verify_code_invalid_email_format(client):
             }
         ]
     }
+
+
+@pytest.mark.auth_routers
+def test_verify_code_valid_request(client, mocker):
+    # Arrange: Mock the verify_auth_code function
+    mock_verify_auth_code = mocker.patch("app.auth.auth_routers.verify_auth_code")
+    mock_verify_auth_code.return_value = {
+        "access_token": "access123",
+        "refresh_token": "refresh123",
+        "token_type": "bearer",
+    }
+
+    # Act: Call the /auth/verify-code route
+    response = client.post(
+        "/auth/verify-code", json={"email": "test@example.com", "auth_code": "123456"}
+    )
+
+    # Assert: Verify the response
+    assert response.status_code == 200
+    assert response.json() == {
+        "access_token": "access123",
+        "refresh_token": "refresh123",
+        "token_type": "bearer",
+    }
+    mock_verify_auth_code.assert_called_once_with("test@example.com", "123456")
