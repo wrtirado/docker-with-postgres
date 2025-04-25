@@ -299,3 +299,25 @@ def test_logout_expired_token(client, mocker):
     assert response.status_code == 401
     assert response.json() == {"detail": "Token has expired"}
     mock_validate_token.assert_called_once_with("expired-token", "refresh")
+
+
+@pytest.mark.auth_routers
+def test_logout_success(client, mocker):
+    # Arrange: Mock the delete_refresh_token function
+    mock_validate_token = mocker.patch("app.auth.auth_routers.validate_token")
+    mock_validate_token.return_value = "valid-refresh-token"
+    mock_delete_refresh_token = mocker.patch(
+        "app.auth.auth_routers.delete_refresh_token"
+    )
+    mock_delete_refresh_token.return_value = {"message": "Logged out successfully"}
+
+    # Act: Call the /auth/logout route with a valid token
+    response = client.post(
+        "/auth/logout",
+        headers={"Authorization": "Bearer valid-refresh-token"},
+    )
+
+    # Assert: Verify the response
+    assert response.status_code == 200
+    assert response.json() == {"message": "Logged out successfully"}
+    mock_delete_refresh_token.assert_called_once_with("valid-refresh-token")
