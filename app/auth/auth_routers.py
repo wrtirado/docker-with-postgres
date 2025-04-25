@@ -79,9 +79,9 @@ def verify_code(request: VerifyCodeRequest):
 # token without requiring the user to log in again.
 @router.post("/refresh-token")
 def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    authorization = credentials.credentials
+    token = credentials.credentials
     # Validate the token and ensure it's a refresh_token
-    token = validate_token(authorization, "refresh")
+    token = validate_token(token, "refresh")
 
     # Verify the refresh token and generate a new access token
     return verify_refresh_token(token)
@@ -94,9 +94,9 @@ def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(security))
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
     # Extract the token from the authorization header
-    authorization = credentials.credentials
+    token = credentials.credentials
     # Validate the token and ensure its a refresh_token
-    refresh_token = validate_token(authorization, "refresh")
+    refresh_token = validate_token(token, "refresh")
     # Invalidate the refresh token by deleting
     # it from the database or cache
     return delete_refresh_token(refresh_token)

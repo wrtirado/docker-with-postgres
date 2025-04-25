@@ -213,15 +213,6 @@ def test_delete_refresh_token_invalid(mocker):
     assert excinfo.value.detail == "Invalid token"
 
 
-import pytest
-from unittest.mock import MagicMock
-from app.auth.auth_queries import validate_token
-from fastapi import HTTPException
-from datetime import datetime, timedelta
-import jwt
-from app.config import SECRET_KEY
-
-
 @pytest.mark.auth_queries
 def test_validate_token_valid(mocker):
     # Arrange: Create a valid token
@@ -231,10 +222,10 @@ def test_validate_token_valid(mocker):
         "token_type": "access",
     }
     valid_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-    authorization = f"Bearer {valid_token}"
+    token = valid_token
 
     # Act: Call the function
-    result = validate_token(authorization, "access")
+    result = validate_token(token, "access")
 
     # Assert: Verify the behavior
     assert result == valid_token
@@ -243,15 +234,15 @@ def test_validate_token_valid(mocker):
 @pytest.mark.auth_queries
 def test_validate_token_invalid_header():
     # Arrange: Invalid Authorization header
-    authorization = "InvalidHeader token"
+    token = "InvalidHeader token"
 
     # Act & Assert: Expect an exception
     with pytest.raises(HTTPException) as excinfo:
-        validate_token(authorization, "access")
+        validate_token(token, "access")
 
     # Assert: Verify the exception details
     assert excinfo.value.status_code == 401
-    assert excinfo.value.detail == "Invalid Authorization header"
+    assert excinfo.value.detail == "Invalid token"
 
 
 @pytest.mark.auth_queries
@@ -264,11 +255,11 @@ def test_validate_token_expired():
         "token_type": "access",
     }
     expired_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-    authorization = f"Bearer {expired_token}"
+    token = expired_token
 
     # Act & Assert: Expect an exception
     with pytest.raises(HTTPException) as excinfo:
-        validate_token(authorization, "access")
+        validate_token(token, "access")
 
     # Assert: Verify the exception details
     assert excinfo.value.status_code == 401
@@ -278,11 +269,11 @@ def test_validate_token_expired():
 @pytest.mark.auth_queries
 def test_validate_token_invalid_token():
     # Arrange: Malformed token
-    authorization = "Bearer invalid.token.here"
+    token = "invalid.token.here"
 
     # Act & Assert: Expect an exception
     with pytest.raises(HTTPException) as excinfo:
-        validate_token(authorization, "access")
+        validate_token(token, "access")
 
     # Assert: Verify the exception details
     assert excinfo.value.status_code == 401
@@ -298,11 +289,11 @@ def test_validate_token_wrong_type():
         "token_type": "refresh",  # Wrong type
     }
     wrong_type_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-    authorization = f"Bearer {wrong_type_token}"
+    token = wrong_type_token
 
     # Act & Assert: Expect an exception
     with pytest.raises(HTTPException) as excinfo:
-        validate_token(authorization, "access")  # Expected type is "access"
+        validate_token(token, "access")  # Expected type is "access"
 
     # Assert: Verify the exception details
     assert excinfo.value.status_code == 401

@@ -40,8 +40,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @router.get("/protected-route")
 def protected_route(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    authorization = credentials.credentials
-    token = validate_token(authorization, "access")
+    token = credentials.credentials
+    token = validate_token(token, "access")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         user = payload["sub"]

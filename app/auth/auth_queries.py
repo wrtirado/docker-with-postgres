@@ -104,12 +104,9 @@ def delete_refresh_token(refresh_token):
     return {"message": "Refresh token deleted successfully"}
 
 
-def validate_token(authorization: str, expected_token_type: str):
-    # Check if there is an Authorization header
-    # and if the Authorization header starts with "Bearer "
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid Authorization header")
-    token = authorization.split(" ")[1]
+def validate_token(token: str, expected_token_type: str):
+    # Decode the token and check if it's valid
+    # and if it's the expected token type
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         # Check if the token is an access token

@@ -37,40 +37,65 @@ This will start all necessary services.
 (It is easiest to handle most of this testing through the Swagger UI)
 
 1. Register new user with a POST to **/users/register**
-   - **POST http://localhost:8000/users/register**
-   - **Body: JSON**
-     ```json
-     {
-       "email": "test@example.com",
-       "password": "password123"
-     }
-     ```
-   - **Response:**
-     ```json
-     {
-       "email": "test@example.com",
-       "is_active": true,
-       "id": 1
-     }
-     ```
+
+- **POST http://localhost:8000/users/register**
+- **Body: JSON**
+  ```json
+  {
+    "email": "user@example.com",
+    "is_active": true
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "email": "user@example.com",
+    "is_active": true,
+    "id": 1
+  }
+  ```
+
 2. Request an auth code with the newly registered email using a POST to **/auth/request-code**
-   - **POST http://localhost:8000/auth/request-code?email=test@example.com**
-   - As of 3/24/25, I have disabled the function that sends the auth code via email. I added a print function that displays the code in the terminal. Copy the code from there. The code will appear in the terminal running the docker containers, within the logs, labeled by "fastapi_app".
-   - **Response:**
-     ```json
-     {
-       "message": "If your email is registered, you will receive an authentication code."
-     }
-     ```
+
+- **POST http://localhost:8000/auth/request-code**
+- **Body: JSON**
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+- As of 3/24/25, I have disabled the function that sends the auth code via email. I added a print function that displays the code in the terminal. Copy the code from there. The code will appear in the terminal running the docker containers, within the logs, labeled by "fastapi_app".
+- **Response:**
+  ```json
+  {
+    "message": "If your email is registered, you will receive an authentication code."
+  }
+  ```
+
 3. To verify the copied auth code, use a POST to **/auth/verify-code** and send both the email associated with the code, and the code itself
-   - **POST http://localhost:8000/auth/verify-code?email=test@example.com&auth_code=<put auth code here>**
-   - If successfull, copy the JWT token that is returned. You will return something like this:
-     ```json
-     {
-       "access_token": "big hash type number",
-       "token_type": "bearer"
-     }
-     ```
+
+- **POST http://localhost:8000/auth/verify-code**
+- **Body: JSON**
+
+```json
+{
+  "email": "user@example.com",
+  "auth_code": "123456"
+}
+```
+
+- If successfull, copy the access token that is returned. You will return something like this:
+
+```json
+{
+  "access_token": "jwt_token_string",
+  "refresh_token": "jwt_token_string",
+  "token_type": "bearer"
+}
+```
+
 4. In a terminal window, send a curl request with the following structure:
 
 ```
@@ -80,14 +105,25 @@ curl -X GET "http://localhost:8000/offices/protected-route"
 This should spit out a unauthorized related error. Now, try adding an **'Authorization: bearer <token>** header to the curl request:
 
 ```
-curl -X GET "http://localhost:8000/offices/protected-route" -H "Authorization: Bearer <your.token.here.should.look.like.string.of.random.characters>"
+curl -X GET 'http://localhost:8000/offices/protected-route' -H 'Authorization: Bearer <jwt_token_here>'
 ```
 
 **/offices/protected-route** is, well, a protected route. If everything worked well, you should get a message showing you're authenticated and successfully ran a GET on the protected route! You should see this in your terminal:
 
+```
+{"message":"Hello, user@example.com, you have access!"}
+```
+
+5. Optionally, if you'd like to delete the refresh_token from Redis, you can send a POST request to /auth/logout passing the refresh_token you'd like to delete:
 
 ```
-{"message":"Hello, test@example.com, you have access!"}
+curl -X POST 'http://localhost:8000/auth/logout' -H 'Authorization: Bearer <jwt_refresh_token_here>'
+```
+
+If successful, you should see this in your terminal:
+
+```
+{"message":"Refresh token deleted successfully"}
 ```
 
 ---
