@@ -126,6 +126,14 @@ If successful, you should see this in your terminal:
 {"message":"Refresh token deleted successfully"}
 ```
 
+## Accessing Protected Routes
+
+When accessing protected routes, make sure that you include an active access_token to the request's Authorization header in the following format:
+
+```
+'Authorization: Bearer <access_token>'
+```
+
 ---
 
 ## Adding New Data Tables
