@@ -179,3 +179,23 @@ def test_refresh_token_missing_authorization_header(client):
     # Assert: Verify the response
     assert response.status_code == 403
     assert response.json() == {"detail": "Not authenticated"}
+
+
+@pytest.mark.auth_routers
+def test_refresh_token_invalid_token(client, mocker):
+    # Arrange: Mock the validate_token function to raise an exception
+    mock_validate_token = mocker.patch("app.auth.auth_routers.validate_token")
+    mock_validate_token.side_effect = HTTPException(
+        status_code=401, detail="Invalid token"
+    )
+
+    # Act: Call the /auth/refresh-token route with an invalid token
+    response = client.post(
+        "/auth/refresh-token",
+        headers={"Authorization": "Bearer invalid-token"},
+    )
+
+    # Assert: Verify the response
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid token"}
+    mock_validate_token.assert_called_once_with("invalid-token", "refresh")
