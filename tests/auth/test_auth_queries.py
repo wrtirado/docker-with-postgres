@@ -8,7 +8,7 @@ from app.auth.auth_queries import (
     validate_token,
 )
 from fastapi import HTTPException
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 import jwt
 from app.config import SECRET_KEY
 
@@ -78,7 +78,7 @@ def test_verify_refresh_token_valid(mocker):
     # Arrange: Encode a valid refresh token
     refresh_payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "token_type": "refresh",
     }
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
@@ -101,7 +101,7 @@ def test_verify_refresh_token_expired(mocker):
     # Arrange: Encode a valid refresh token
     refresh_payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() - timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) - timedelta(minutes=10),
         "token_type": "refresh",
     }
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
@@ -124,7 +124,7 @@ def test_verify_refresh_token_invalid(mocker):
     # Arrange: Encode a valid refresh token
     refresh_payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "token_type": "refresh",
     }
     refresh_token = jwt.encode(refresh_payload, "123456789", algorithm="HS256")
@@ -147,7 +147,7 @@ def test_delete_refresh_token_valid(mocker):
     # Arrange: Encode a valid refresh token
     refresh_payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "token_type": "refresh",
     }
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
@@ -171,7 +171,7 @@ def test_delete_refresh_token_expired(mocker):
     # Arrange: Encode a valid refresh token
     refresh_payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() - timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) - timedelta(minutes=10),
         "token_type": "refresh",
     }
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
@@ -195,7 +195,7 @@ def test_delete_refresh_token_invalid(mocker):
     # Arrange: Encode a valid refresh token
     refresh_payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "token_type": "refresh",
     }
     refresh_token = jwt.encode(refresh_payload, "123456789", algorithm="HS256")
@@ -227,7 +227,7 @@ def test_validate_token_valid(mocker):
     # Arrange: Create a valid token
     payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "token_type": "access",
     }
     valid_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
@@ -259,7 +259,8 @@ def test_validate_token_expired():
     # Arrange: Create an expired token
     payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() - timedelta(minutes=10),  # Expired 10 minutes ago
+        "exp": datetime.now(timezone.utc)
+        - timedelta(minutes=10),  # Expired 10 minutes ago
         "token_type": "access",
     }
     expired_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
@@ -293,7 +294,7 @@ def test_validate_token_wrong_type():
     # Arrange: Create a token with the wrong type
     payload = {
         "sub": "test@example.com",
-        "exp": datetime.utcnow() + timedelta(minutes=10),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "token_type": "refresh",  # Wrong type
     }
     wrong_type_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
