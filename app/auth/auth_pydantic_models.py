@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class RequestCodeRequest(BaseModel):
-    email: str
+    email: EmailStr
 
 
 class VerifyCodeRequest(BaseModel):
-    email: str
+    email: EmailStr
     auth_code: str

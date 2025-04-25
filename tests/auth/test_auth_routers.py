@@ -103,3 +103,25 @@ def test_verify_code_missing_fields(client):
             },
         ]
     }
+
+
+@pytest.mark.auth_routers
+def test_verify_code_invalid_email_format(client):
+    # Act: Call the /auth/verify-code route with an invalid email
+    response = client.post(
+        "/auth/verify-code", json={"email": "invalid-email", "auth_code": "123456"}
+    )
+
+    # Assert: Verify the response
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": ["body", "email"],
+                "msg": "value is not a valid email address: An email address must have an @-sign.",
+                "type": "value_error",
+                "input": "invalid-email",
+                "ctx": {"reason": "An email address must have an @-sign."},
+            }
+        ]
+    }
