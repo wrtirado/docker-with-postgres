@@ -5,6 +5,7 @@ tests/real-python-pytest-practice/parametrization
 
 # Virtual environment
 venv/
+.venv/
 .env
 
 # Python cache files

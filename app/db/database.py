@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
-from app.models.sqlalchemy import sql_users, sql_office
+from app.models.sqlalchemy import sql_users, sql_office, sql_company
 from app.db.base import Base
 
 DATABASE_URL = os.getenv(

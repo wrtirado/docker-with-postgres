@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.db.database import SessionLocal, engine
 from app.queries.users_queries import create_user
 from app.models.sqlalchemy.sql_users import User
 from app.models.pydantic.pydantic_users import UserCreate
 from app.models.pydantic.pydantic_users import User as UserPydantic
 from app.db.database import get_db
+
+# from app.db.database import SessionLocal, engine
 
 router = APIRouter()
 
