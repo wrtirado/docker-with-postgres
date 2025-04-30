@@ -1,9 +1,6 @@
 import pytest
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
-from app.auth.auth_routers import request_code, verify_code, refresh_token, logout
-from app.auth.auth_queries import generate_auth_code
-from app.auth import auth_routers
 
 
 @pytest.mark.auth_routers
