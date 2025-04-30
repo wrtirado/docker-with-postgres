@@ -27,12 +27,6 @@ def create_company(db: Session, company_in: CompanyCreate) -> Company:
     db.commit()
     db.refresh(company)
     return company
-    # This is the Copilot suggestion (in the event ChatGPT doesn't work):
-    # company = Company(**company_in.model_dump())
-    # db.add(company)
-    # db.commit()
-    # db.refresh(company)
-    # return company
 
 
 def get_company_by_id(db: Session, company_id: str) -> Company | None:
