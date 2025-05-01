@@ -13,7 +13,7 @@ from app.models.pydantic.pydantic_office import Office, OfficeCreate
 from app.models.sqlalchemy.sql_office import Office as DBOffice
 from app.queries.office_queries import (
     get_offices,
-    get_office,
+    get_office_by_id,
     create_office,
     update_office,
     delete_office,
@@ -59,30 +59,29 @@ def read_offices(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 
 
 @router.get("/{office_id}", response_model=Office)
-def read_office(db: Session = Depends(get_db), office_id: int = None):
-    office = get_office(db, office_id)
+def read_office(db: Session = Depends(get_db), office_id: str = None):
+    office = get_office_by_id(db, office_id)
     if office is None:
         raise HTTPException(status_code=404, detail="Office not found")
     return office
 
 
 @router.post("/", response_model=Office)
-def add_office(office: OfficeCreate, db: Session = Depends(get_db)):
-    db_office = create_office(db, office)
+def add_office(office_in: OfficeCreate, db: Session = Depends(get_db)):
+    db_office = create_office(db, office_in)
     return db_office
 
 
 @router.put("/{office_id}", response_model=Office)
-def change_office(office_id: int, office: OfficeCreate, db: Session = Depends(get_db)):
-    db_office = update_office(db, office_id, office)
+def change_office(
+    office_id: str, office_update: OfficeCreate, db: Session = Depends(get_db)
+):
+    db_office = update_office(db, office_id, office_update)
     if db_office is None:
         raise HTTPException(status_code=404, detail="Office not found")
     return db_office
 
 
-@router.delete("/{office_id}", response_model=Office)
-def remove_office(office_id: int, db: Session = Depends(get_db)):
-    db_office = delete_office(db, office_id)
-    if db_office is None:
-        raise HTTPException(status_code=404, detail="Office not found")
-    return db_office
+@router.delete("/{office_id}")
+def remove_office(office_id: str, db: Session = Depends(get_db)):
+    return delete_office(db, office_id)

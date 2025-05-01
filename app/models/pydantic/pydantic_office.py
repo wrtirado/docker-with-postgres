@@ -1,8 +1,11 @@
 from pydantic import BaseModel, ConfigDict
+from uuid import UUID
 
 
 class BaseOffice(BaseModel):
-    business_name: str
+    name: str
+    address: str
+    company_id: UUID
 
 
 class OfficeCreate(BaseOffice):
@@ -10,7 +13,10 @@ class OfficeCreate(BaseOffice):
 
 
 class Office(BaseOffice):
-    id: int
+    id: UUID
+    address: str
+    created_at: str
+    company_id: UUID
 
     model_config = ConfigDict(
         from_attributes=True
